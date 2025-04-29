@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"strings"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -378,10 +379,10 @@ func IsPodPreempted(pod *v1.Pod) bool {
 				return true
 			}
 		}
-		if containerCondition.Message != "" && containerCondition.Message == "Pod was terminated in response to imminent node shutdown" {
-			log.Infof("Pod %s is prempted by Google", pod.Name)
-			return true
-		}
+	}
+	if strings.Contains("Pod was terminated in response to imminent node shutdown.",pod.Status.Message) {
+		log.Infof("Pod %s is prempted by Google, eligible for a retry", pod.Name)
+                return true
 	}
 
 	return false
